@@ -14,8 +14,7 @@ get "$PM/gmloadernext.aarch64"               "$D/gmloadernext.aarch64"          
 get "$PM/lib/arm64-v8a/libcompiler_rt.so"     "$D/lib/arm64-v8a/libcompiler_rt.so" fe923cfe4bb934391ae16fc966bfb7fe
 get "$PM/lib/arm64-v8a/libc++_shared.so"      "$D/lib/arm64-v8a/libc++_shared.so"  2c2c1c32815e6aa1e2a725a2ff3b1d32
 get "$PM/lib/arm64-v8a/libm.so"               "$D/lib/arm64-v8a/libm.so"           b37f82bd7fcea9f582a2601ecebaf7cc
-get "$PM/license/LICENSE.gmloader.txt"        "$D/LICENSE.gmloader.txt" "$(curl -fsSL "$PM/license/LICENSE.gmloader.txt" | md5sum | cut -d' ' -f1)"
-get "$PM/license/LICENSE.bionic.txt"          "$D/LICENSE.bionic.txt"   "$(curl -fsSL "$PM/license/LICENSE.bionic.txt" | md5sum | cut -d' ' -f1)"
+for l in LICENSE.gmloader.txt LICENSE.bionic.txt; do [ -f "$D/$l" ] || curl -fsSL -o "$D/$l" "$PM/license/$l"; done
 get "$GP"                                     "$D/runner-2.3.7.apk"              b7ec8029b34b16d9401f0022fa124af4
 for a in linux-x86_64 aarch64; do
   [ -f "$D/gmtoolkit-$a.zip" ] || curl -fsSL -o "$D/gmtoolkit-$a.zip" "$GT/gmtoolkit-$a.zip"

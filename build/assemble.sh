@@ -9,7 +9,7 @@ B="$(cd "$(dirname "$0")" && pwd)"; R="$(cd "$B/.." && pwd)"; G="$(realpath "$1"
 rm -rf "$O"; mkdir -p "$O/saves" "$O/w/assets" "$O/w/lib/arm64-v8a"
 cp "$B/deps/gmloadernext.aarch64" "$O/"; cp -r "$B/deps/lib" "$O/"; cp "$R/port/deadestate/gmloader.json" "$O/"
 cp "$G/data.win" "$O/w/assets/game.droid"; cp "$G"/audiogroup*.dat "$O/w/assets/"
-cp -r "$R/port/deadestate/tools" "$O/w/tools"; cp "$B/deps/gmtk-x86_64/gmtoolkit"* "$O/w/tools/gmtoolkit"
+cp -r "$R/port/deadestate/tools" "$O/w/tools"; cp "$B/deps/gmtk-x86_64/gmtoolkit.linux-x86_64" "$O/w/tools/gmtoolkit"
 docker run --rm -v "$O:/o" -w /o/w/assets debian:bookworm bash -c '
   apt-get update -qq && apt-get install -y -qq vorbis-tools >/dev/null 2>&1
   mkdir -p /o/w/saves && /o/w/tools/gmtoolkit game.droid --config /o/w/tools/gmtoolkit.json

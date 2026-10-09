@@ -3,3 +3,5 @@ gamefiles/
 tests/pc/sysroot/
 tests/pc/bin/
 tests/out/
+build/deps/
+dist/

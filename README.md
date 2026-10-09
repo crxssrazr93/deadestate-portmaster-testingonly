@@ -6,8 +6,8 @@ No game files are included. You supply the demo from your own Steam library.
 
 | | |
 |--|--|
-| Status | Boots on an Anbernic RG35XX H (Knulli, Mali G31, 1 GB) to the character select screen, through EmulationStation, with a hand assembled port. Gameplay, input, sound and frame rate are not tested yet. |
-| Memory | 260 MB resident after two minutes, 540 MB still available (the unmodified game was killed by the OOM killer at 670 MB). |
+| Status | A port built by `build/assemble.sh` boots on an Anbernic RG35XX H (Knulli, Mali G31, 1 GB) through EmulationStation to the title screen and attract mode, and the game finds the device's controls as a gamepad ("Xbox 360 Controller" at slot 0). Gameplay, sound and frame rate are not tested yet. |
+| Memory | 243 to 260 MB peak resident after two minutes, about 550 MB still available (the unmodified game was killed by the OOM killer at 670 MB). |
 | Route | gmloader-next (a pre 2026-04-24 build) with the GameMaker 2.3.7 Android arm64 runner, after a gmtoolkit pass (ASTC textures, compressed audio, GMLive patched out). |
 | Game | Steam app 1529790, depot 1529791 (Windows), build 7634959. GameMaker VM build, bytecode 17, runtime 2.3.6.464, 480x270. |
 
