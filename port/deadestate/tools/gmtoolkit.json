@@ -1,0 +1,15 @@
+{
+  "externalize_textures": "../saves/textures",
+  "block": "6x6",
+  "quality": "fast",
+  "set_flags": ["Fullscreen"],
+  "compress_audio": {
+    "min_size": "auto",
+    "bitrate": 64,
+    "downmix": false,
+    "recompress_ogg": true
+  },
+  "code_patches": [
+    { "entry": "gml_Object_obj_gmlive_Create_0", "gml": "gml/gml_Object_obj_gmlive_Create_0.gml" }
+  ]
+}
