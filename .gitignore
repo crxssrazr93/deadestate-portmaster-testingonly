@@ -1,0 +1,5 @@
+gamefiles/
+*.zip
+tests/pc/sysroot/
+tests/pc/bin/
+tests/out/
