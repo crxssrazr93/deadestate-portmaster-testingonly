@@ -1,6 +1,6 @@
 # Dead Estate (Demo) for PortMaster: testing only
 
-Work in progress towards a [PortMaster](https://portmaster.games/) port of the [Dead Estate](https://store.steampowered.com/app/1484720/Dead_Estate/) demo (Cute Bunny Games, 2021), a twin stick roguelite shooter, for aarch64 Linux handhelds. This repository is a test bed, not a release: there is no packaged port and no patcher yet.
+Work in progress towards a [PortMaster](https://portmaster.games/) port of the [Dead Estate](https://store.steampowered.com/app/1484720/Dead_Estate/) demo (Cute Bunny Games, 2021), a twin stick roguelite shooter, for aarch64 Linux handhelds. This repository is a test bed, not a release: the port packages and patches itself on the device, but it has not been play tested.
 
 No game files are included. You supply the demo from your own Steam library.
 
@@ -8,6 +8,7 @@ No game files are included. You supply the demo from your own Steam library.
 |--|--|
 | Status | A port built by `build/assemble.sh` boots on an Anbernic RG35XX H (Knulli, Mali G31, 1 GB) through EmulationStation to the title screen and attract mode, and the game finds the device's controls as a gamepad ("Xbox 360 Controller" at slot 0). Gameplay, sound and frame rate are not tested yet. |
 | Memory | 243 to 260 MB peak resident after two minutes, about 550 MB still available (the unmodified game was killed by the OOM killer at 670 MB). |
+| Patcher | Tested on the device from a clean install of `build/package.sh` output: PortMaster's patcher screen runs `tools/patchscript` (gmtoolkit on the device) in about 18 minutes on the H700, then the game starts. |
 | Route | gmloader-next (a pre 2026-04-24 build) with the GameMaker 2.3.7 Android arm64 runner, after a gmtoolkit pass (ASTC textures, compressed audio, GMLive patched out). |
 | Game | Steam app 1529790, depot 1529791 (Windows), build 7634959. GameMaker VM build, bytecode 17, runtime 2.3.6.464, 480x270. |
 
@@ -21,11 +22,12 @@ The folder needs `data.win`, `audiogroup1.dat` and `audiogroup2.dat`.
 
 ## Layout
 
-* `port/`: what will ship. `Dead Estate.sh` (launcher, no patcher yet), `deadestate/gmloader.json`, `deadestate/tools/gmtoolkit.json` (texture, audio and code patch config) and `deadestate/tools/gml/` (GML replacements).
+* `port/`: what will ship. `Dead Estate.sh` (launcher with the patcher step), `deadestate/tools/patchscript` (first start patching on the device), `deadestate/gmloader.json`, `deadestate/tools/gmtoolkit.json` (texture, audio and code patch config) and `deadestate/tools/gml/` (GML replacements).
 * `build/fetch_deps.sh`: downloads the loader, its shim libraries, the 2.3.7 runner and gmtoolkit, pinned to commits and checked by MD5.
-* `build/assemble.sh <game folder> <out dir>`: builds a runnable port folder on a PC (gmtoolkit runs in a Docker container that has vorbis-tools).
+* `build/package.sh`: makes `dist/deadestate.zip`, the folder a player installs (runner in `deadestate.port`, gmtoolkit for aarch64, no game files).
+* `build/assemble.sh <game folder> <out dir>`: builds an already patched port folder on a PC (gmtoolkit runs in a Docker container that has vorbis-tools).
 * `tests/localtest.sh`: runs that port folder on an x86_64 PC (see below).
-* `tests/device/knulli.sh` and `tests/device/knulli_shot.sh`: run a command on the test device and grab its screen.
+* `tests/device/knulli.sh`, `knulli_shot.sh` and `devpad.py`: run a command on the test device, grab its screen, and press its buttons.
 * `docs/PORTING.md`: findings, the route that works, and every route that failed with the reason.
 
 ## Testing on a PC
@@ -51,6 +53,15 @@ tests/device/knulli_shot.sh shot.png
 
 The game writes its log to `/userdata/roms/ports/deadestate/log.txt`.
 
+To test the patcher, unzip `dist/deadestate.zip` into `/userdata/roms/ports/`, copy the three game files into `deadestate/assets/` and launch as above. The patcher screen waits for a button press before it starts and again when it ends; press A on the device with `devpad.py` (copy it to `/tmp` first):
+
+```
+tests/device/knulli.sh 'cat > /tmp/devpad.py' < tests/device/devpad.py
+tests/device/knulli.sh 'python3 /tmp/devpad.py "press A; wait 2; press A; wait 2; press A"'
+```
+
+Its log is `deadestate/patchlog.txt` (`patcherr.txt` on failure). The game starts in keyboard mode and switches to the gamepad a few seconds later ("gamepad detected @ slot 0" in the log).
+
 ## Findings
 
 * **Loader:** gmloader-next commit 5c1df13 (2026-04-24) loads every library a runner depends on and fails on a missing one. All GameMaker 2.3.x Android runners need `liboboe.so`, which needs `libOpenSLES.so`, which the loader does not provide. Builds from before that commit skip it and run the 2.3.7 runner fine. A 2022 runner (no oboe) segfaults while loading this game's data.
@@ -61,16 +72,15 @@ The game writes its log to `/userdata/roms/ports/deadestate/log.txt`.
 
 ## To do
 
-1. Patchscript for the PortMaster patcher screen: run gmtoolkit on the device (aarch64 build), zip `assets/` into `deadestate.port`, md5 check of `data.win`.
-2. Play test on the device: movement, aiming, firing, menus, pause, the hotkey exit; check gptokeyb sends no keys.
-3. Measure frame rate in a busy room (target 60 fps on the bytecode interpreter). Check film grain and the static shader cost.
-4. Check the shaders on Mali: `shSwap` palette swap precision (mediump banding) and `sh_outline` loops with non constant bounds.
-5. Decide whether palette keyed pages must stay inline (`keep_inline_colors`) so ASTC does not shift the key colours.
-6. Window logic: `window_set_fullscreen` is called every frame when the setting differs, and the scale is clamped to `display_get_height() div 270`.
-7. Steam: `steam_is_screenshot_requested` and `steam_is_overlay_activated` run unguarded every frame (the loader stubs them, confirm no log spam or cost).
-8. Scripted virtual pad for `tests/localtest.sh` and the device (as in the other ports' `vpad.py` / `devpad.py`).
-9. `port.json`, `README.md` for players, `gameinfo.xml`, cover and screenshot, `build/package.sh`.
-10. Test on muOS and on a 2 GB device; decide a 4x4 ASTC config for devices with more RAM.
+1. Play test on the device: movement, aiming, firing, menus, pause, the hotkey exit; check gptokeyb sends no keys.
+2. Measure frame rate in a busy room (target 60 fps on the bytecode interpreter). Check film grain and the static shader cost.
+3. Check the shaders on Mali: `shSwap` palette swap precision (mediump banding) and `sh_outline` loops with non constant bounds.
+4. Decide whether palette keyed pages must stay inline (`keep_inline_colors`) so ASTC does not shift the key colours.
+5. Window logic: `window_set_fullscreen` is called every frame when the setting differs, and the scale is clamped to `display_get_height() div 270`.
+6. Steam: `steam_is_screenshot_requested` and `steam_is_overlay_activated` run unguarded every frame (the loader stubs them, confirm no log spam or cost).
+7. Scripted virtual pad for `tests/localtest.sh` (the device has `devpad.py`; the PC run has no pad, so the game stays in keyboard mode).
+8. `port.json`, `README.md` for players, `gameinfo.xml`, cover and screenshot.
+9. Test on muOS and on a 2 GB device; decide a 4x4 ASTC config for devices with more RAM.
 
 ## License
 

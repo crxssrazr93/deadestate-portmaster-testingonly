@@ -32,3 +32,7 @@ Measured on an RG35XX H (Knulli): reaches character select, 260 MB RSS after 2 m
 * Native gamepad support (twin stick). `game.manageController` switches to keyboard and mouse on any key or mouse event, so gptokeyb must not send keys. The log shows "Set controls to gamepad" on the device.
 * Renders 480x270 through three surfaces with shaders, letterboxed to 640x360 on a 640x480 screen.
 * Only `settings.sav` is written (`ds_map_secure_save`).
+
+## On device patching
+
+Measured on the RG35XX H from a clean install of `build/package.sh` output: gmtoolkit (aarch64, 2 threads, CPU capped at 80%) compresses audio in about 15 minutes (110.7 MB to 32.6 MB) and the 67 textures in about 3, about 18 minutes in all. The result matches the PC build to within the zip metadata. The PortMaster patcher screen needs a button press before it starts and when it ends.

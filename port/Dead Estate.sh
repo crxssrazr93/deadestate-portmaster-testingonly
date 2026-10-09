@@ -23,6 +23,23 @@ cd "$GAMEDIR"
 
 export LD_LIBRARY_PATH="$GAMEDIR/lib:$LD_LIBRARY_PATH"
 $ESUDO chmod +x "$GAMEDIR/gmloadernext.aarch64"
+$ESUDO chmod +x "$GAMEDIR/tools/gmtoolkit.${DEVICE_ARCH}"
+
+# First start (or new game files in assets/): patch them on the PortMaster patcher screen.
+if [ ! -f "$GAMEDIR/patchlog.txt" ] || [ -f "$GAMEDIR/assets/data.win" ]; then
+  if [ -f "$controlfolder/utils/patcher.txt" ]; then
+    export PATCHER_FILE="$GAMEDIR/tools/patchscript"
+    export PATCHER_GAME="$(basename "${0%.*}")"
+    export PATCHER_TIME="about 20 minutes"
+    export controlfolder ESUDO DEVICE_RAM DEVICE_ARCH
+    source "$controlfolder/utils/patcher.txt"
+    $ESUDO kill -9 $(pidof gptokeyb) 2>/dev/null
+  else
+    pm_message "This port requires the latest version of PortMaster."
+    exit 1
+  fi
+fi
+[ -f "$GAMEDIR/patchlog.txt" ] || { pm_message "Patching did not finish. See ports/deadestate/patcherr.txt."; exit 1; }
 
 # The game reads the pad itself (twin stick); gptokeyb only handles the hotkey exit.
 $GPTOKEYB "gmloadernext.aarch64" &
